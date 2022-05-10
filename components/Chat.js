@@ -1,7 +1,58 @@
 import React, { Component } from 'react';
-import { View , Text, StyleSheet } from 'react-native';
+import { View , Platform, KeyboardAvoidingView, StyleSheet } from 'react-native';
+import { GiftedChat } from 'react-native-gifted-chat';
 
 export default class Chat extends Component {
+    constructor() {
+        super();
+        this.state = {
+            messages:[]
+        }
+    }
+
+    componentDidMount() {
+        let name = this.props.route.params.name;
+        this.setState({
+            messages: [
+                {
+                    _id: 1,
+                    text: 'Hello developer',
+                    createdAt: new Date(),
+                    user: {
+                        _id: 2,
+                        name: 'React Native',
+                        avatar: 'https://placeimg.com/140/140/any',
+                    },
+                },
+                {
+                    _id: 2, 
+                    text: `${name} joined to chat room`,
+                    createAt: new Date(),
+                    system: true,
+                },
+            ],
+        })
+    }
+
+    onSend(messages = []) {
+        this.setState(previousState => ({
+            messages: GiftedChat.append(previousState.messages, messages),
+            name: this.props.route.params.name
+        }))
+    }
+
+    renderBubble(props) {
+        return(
+            <Bubble
+                {...props}
+                wrapperStyle={{
+                    right: {
+                        backgroundColor: '#000'
+                    }
+                }}
+            />
+        )
+    }
 
     render() {
 
@@ -10,7 +61,17 @@ export default class Chat extends Component {
         this.props.navigation.setOptions({title: name});
         return(
             <View style={[{backgroundColor: color}, styles.container]}>
-                <Text style={styles.text}>Chat screen</Text>           
+                <GiftedChat
+                    messages={this.state.messages}
+                    onSend={messages => this.onSend(messages)}
+                    user={{
+                        _id: 1,
+                    }}
+                />
+                { Platform.OS === 'android' ? (
+                    <KeyboardAvoidingView behavior="height" /> 
+                    ) : null
+                }
             </View>
         )
     }
@@ -18,10 +79,6 @@ export default class Chat extends Component {
 
 const styles = StyleSheet.create({
     container: {
-        height: '100%'
-    },
-    text: {
-        color: '#ffffff',
-        fontSize: 20
+        flex: 1,
     }
 })
