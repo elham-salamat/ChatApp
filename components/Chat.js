@@ -5,10 +5,6 @@ import { GiftedChat, Bubble } from 'react-native-gifted-chat';
 import * as firebase from 'firebase';
 import 'firebase/firestore';
 
-// import { initializeApp } from "firebase/app";
-// import { getFirestore, collection, onSnapshot, addDoc, query, orderBy } from "firebase/firestore";
-// import { getAuth, onAuthStateChanged, signInAnonymously } from "firebase/auth";
-
 export default class Chat extends Component {
     constructor() {
         super();
@@ -33,11 +29,11 @@ export default class Chat extends Component {
         };
 
         if (!firebase.apps.length) {
-            firebase.initializeApp(firebasrConfig);
+            firebase.initializeApp(firebaseConfig);
         }
 
-        // refrencs the database 
-        thisReferenceChatMessages = firebase.firestore().collection('messages');
+        // referencs the database 
+        this.referenceChatMessages = firebase.firestore().collection('messages');
     }
 
     componentDidMount() {
@@ -53,9 +49,10 @@ export default class Chat extends Component {
                 user: {
                     _id: user.uid,
                     name: name,
-                    avatar: "https://placeimg.com/140/140/any"
+                    avatar: 'https://placeimg.com/140/140/any'
                   }
             });
+
             this.unsubscribe = this.referenceChatMessages
                 .orderBy('createdAt', 'desc')
                 .onSnapshot(this.onCollectionUpdate);
@@ -85,7 +82,7 @@ export default class Chat extends Component {
         });
     };
 
-      //adding messages to the database
+    //adding messages to the database
     addMessage() {
         const message = this.state.messages[0];
     
@@ -106,11 +103,11 @@ export default class Chat extends Component {
     }
 
     componentWillUnmount() {
-
-          this.authUnsubscribe();
-          this.unsubscribe();
- 
-      }
+        if (this.state.isConnected) {
+            this.authUnsubscribe();
+            this.unsubscribe();
+        }
+    }
     
 
     renderBubble(props) {
