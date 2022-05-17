@@ -1,45 +1,117 @@
 import React, { Component } from 'react';
 import { View , Platform, KeyboardAvoidingView, StyleSheet } from 'react-native';
-import { GiftedChat } from 'react-native-gifted-chat';
+import { GiftedChat, Bubble } from 'react-native-gifted-chat';
+
+import * as firebase from 'firebase';
+import 'firebase/firestore';
+
+// import { initializeApp } from "firebase/app";
+// import { getFirestore, collection, onSnapshot, addDoc, query, orderBy } from "firebase/firestore";
+// import { getAuth, onAuthStateChanged, signInAnonymously } from "firebase/auth";
 
 export default class Chat extends Component {
     constructor() {
         super();
         this.state = {
-            messages:[]
+            messages:[], 
+            uid: 0,
+            user: {
+                _id: '',
+                name: '',
+                avatar: ''
+            }            
         }
+
+        //database information 
+        const firebaseConfig = {
+            apiKey: "AIzaSyDdKoPyIS6SvN-2LHHZsJTG91BwDhPvlS4",
+            authDomain: "chatapp-1d9de.firebaseapp.com",
+            projectId: "chatapp-1d9de",
+            storageBucket: "chatapp-1d9de.appspot.com",
+            messagingSenderId: "508838520885",
+            appId: "1:508838520885:web:15904733ec4415442ca97c"
+        };
+
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebasrConfig);
+        }
+
+        // refrencs the database 
+        thisReferenceChatMessages = firebase.firestore().collection('messages');
     }
 
     componentDidMount() {
         let name = this.props.route.params.name;
+        
+        this.authUnsubscribe = firebase.auth().onAuthStateChanged((user) => {
+            if (!user) {
+                firebase.auth().signInAnonymously();
+            }
+            this.setState({
+                uid: user.uid,
+                messages: [],
+                user: {
+                    _id: user.uid,
+                    name: name,
+                    avatar: "https://placeimg.com/140/140/any"
+                  }
+            });
+            this.unsubscribe = this.referenceChatMessages
+                .orderBy('createdAt', 'desc')
+                .onSnapshot(this.onCollectionUpdate);
+        });
+    }
+
+    onCollectionUpdate = (querySnapshot) => {
+        const messages = [];
+        //go through each document
+        querySnapshot.forEach((doc) => {
+            //get the QueryDocumentSnapshot's data
+            let data = doc.data();
+            messages.push({
+                _id: data._id, 
+                createdAt: data.createdAt.toDate(),
+                text: data.text,
+                user: {
+                    _id: data.user._id,
+                    name: data.user.name,
+                    avatar: data.user.avatar
+                }
+            });
+        });
+        
         this.setState({
-            messages: [
-                {
-                    _id: 1,
-                    text: 'Hello developer',
-                    createdAt: new Date(),
-                    user: {
-                        _id: 2,
-                        name: 'React Native',
-                        avatar: 'https://placeimg.com/140/140/any',
-                    },
-                },
-                {
-                    _id: 2, 
-                    text: `${name} joined to chat room`,
-                    createAt: new Date(),
-                    system: true,
-                },
-            ],
-        })
+            messages: messages
+        });
+    };
+
+      //adding messages to the database
+    addMessage() {
+        const message = this.state.messages[0];
+    
+        this.referenceChatMessages.add({
+            _id: message._id,
+            createdAt: message.createdAt,
+            text: message.text,
+            user: this.state.user
+        });
     }
 
     onSend(messages = []) {
         this.setState(previousState => ({
             messages: GiftedChat.append(previousState.messages, messages),
-            name: this.props.route.params.name
-        }))
+        }), () => {
+            this.addMessage();
+        })
     }
+
+    componentWillUnmount() {
+
+          this.authUnsubscribe();
+          this.unsubscribe();
+ 
+      }
+    
 
     renderBubble(props) {
         return(
@@ -64,9 +136,7 @@ export default class Chat extends Component {
                 <GiftedChat
                     messages={this.state.messages}
                     onSend={messages => this.onSend(messages)}
-                    user={{
-                        _id: 1,
-                    }}
+                    user={this.state.user}
                 />
                 { Platform.OS === 'android' ? (
                     <KeyboardAvoidingView behavior="height" /> 
