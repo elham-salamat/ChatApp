@@ -16,8 +16,8 @@ export default class Chat extends Component {
                 _id: '',
                 name: '',
                 avatar: ''
-            },
-            isConnected: false
+            }, 
+            isConnected: undefined
         }
 
         //database information 
@@ -51,7 +51,7 @@ export default class Chat extends Component {
     async getMessages() {
         let messages = '';
         try {
-             messages = await AsyncStorage.getItem('messages') || [];
+             messages = (await AsyncStorage.getItem('messages')) || [];
             this.setState({
                 messages: JSON.parse(messages)
             });
@@ -81,9 +81,9 @@ export default class Chat extends Component {
 
             // When user is online, retrieve messages from firebase store
             if (connection.isConnected) {
-                this.setState({
-                    isConnected: true
-                });
+                // this.setState({
+                //     isConnected: true
+                // });
 
                 this.authUnsubscribe = firebase.auth().onAuthStateChanged((user) => {
                     if (!user) {
@@ -97,7 +97,7 @@ export default class Chat extends Component {
                             _id: user.uid,
                             name: name,
                             avatar: 'https://placeimg.com/140/140/any'
-                        }
+                        }, isConnected: true
                     });
         
                     this.unsubscribe = this.referenceChatMessages
@@ -165,7 +165,7 @@ export default class Chat extends Component {
             this.addMessages();
         })
     }
-
+    
     // componentWillUnmount() {
     //     if (this.state.isConnected) {
     //         this.authUnsubscribe();
@@ -173,16 +173,16 @@ export default class Chat extends Component {
     //     }
     // }
 
-    // renderInputToolbar(props) {
-    //     if (this.state.isConnected == false) {
-    //     } else {
-    //         return(
-    //             <InputToolbar
-    //             {...props}
-    //             />
-    //         );
-    //     }
-    // }
+    renderInputToolbar(props) {
+        if (this.state.isConnected == false) {
+        } else {
+            return(
+                <InputToolbar
+                {...props}
+                />
+            );
+        }
+    }
 
     renderBubble(props) {
         return(
