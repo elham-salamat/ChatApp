@@ -12,12 +12,12 @@ export default class Chat extends Component {
         this.state = {
             messages:[], 
             uid: 0,
+            isConnected: false,
             user: {
                 _id: '',
                 name: '',
                 avatar: ''
-            }, 
-            isConnected: undefined
+            }
         }
 
         //database information 
@@ -76,7 +76,8 @@ export default class Chat extends Component {
 
         // Retrieving name proerty passed from the Start Screen
         let name = this.props.route.params.name;
-
+        
+        console.log(this.state.isConnected);
         NetInfo.fetch().then(connection => {
 
             // When user is online, retrieve messages from firebase store
@@ -97,7 +98,8 @@ export default class Chat extends Component {
                             _id: user.uid,
                             name: name,
                             avatar: 'https://placeimg.com/140/140/any'
-                        }, isConnected: true
+                        }, 
+                        isConnected: true
                     });
         
                     this.unsubscribe = this.referenceChatMessages
@@ -111,11 +113,8 @@ export default class Chat extends Component {
                     this.saveMessages();
                 }); 
 
-            } else {
-                this.setState({
-                    isConnected: false
-                });
-                
+            } else {    
+                console.log(this.state.isConnected);      
                 // Load messages from asyncStorage when the user is offline
                 this.getMessages();
             }
@@ -166,12 +165,12 @@ export default class Chat extends Component {
         })
     }
     
-    // componentWillUnmount() {
-    //     if (this.state.isConnected) {
-    //         this.authUnsubscribe();
-    //         this.unsubscribe();
-    //     }
-    // }
+    componentWillUnmount() {
+        if (this.state.isConnected) {
+            this.authUnsubscribe();
+            this.unsubscribe();
+        }
+    }
 
     renderInputToolbar(props) {
         if (this.state.isConnected == false) {
@@ -208,8 +207,8 @@ export default class Chat extends Component {
             <View style={[{backgroundColor: color}, styles.container]}>
                 <GiftedChat
                     messages={this.state.messages}
-                    renderInputToolbar={this.renderInputToolbar}
-                    renderBubble={this.renderBubble}
+                    renderInputToolbar={this.renderInputToolbar.bind(this)}
+                    renderBubble={this.renderBubble.bind(this)}
                     onSend={messages => this.onSend(messages)}
                     user={this.state.user}
                 />
