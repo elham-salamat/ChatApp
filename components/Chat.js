@@ -158,11 +158,11 @@ export default class Chat extends Component {
     //adding messages to the database
     addMessages() {
         const message = this.state.messages[0];
-    
+            
         this.referenceChatMessages.add({
             _id: message._id,
             createdAt: message.createdAt,
-            text: message.text,
+            text: message.text || null,
             user: this.state.user,
             image: message.image || null,
             location: message.location || null,
@@ -172,10 +172,12 @@ export default class Chat extends Component {
     onSend(messages = []) {
         this.setState(previousState => ({
             messages: GiftedChat.append(previousState.messages, messages),
-        }), () => {
+        }), 
+        () => {
             this.addMessages();
-            this.saveMessages();
-        })
+            // this.saveMessages();
+        }
+        )
     }
     
     componentWillUnmount() {
@@ -213,8 +215,7 @@ export default class Chat extends Component {
         return <CustomActions {...props} />;
     };
 
-      //render a map with current location, if the user shared their location on a message
-
+    //render a map with current location, if the user shared their location on a message
     renderCustomView(props) {
         const { currentMessage } = props;
         if (currentMessage.location) {

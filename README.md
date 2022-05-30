@@ -30,7 +30,7 @@ and location data.
 **React Native** to develop mobile app because 
 * it allows to create the same codebase for IOS and Android. 
 * it has a large and active communiy 
-* it allows me to use my javascrip tand react knowledge rather than learning a new programming laguage. 
+* it allows me to use my javascript and react knowledge rather than learning a new programming laguage. 
 
 **Expo** CLI to develope and test the app. 
 
@@ -40,31 +40,77 @@ and location data.
 
 
 ## Necessary steps in developement process
+
+### Prerequisite: 
+Node and latest version of npm
+
 ### Setting up the Expo developement environment 
 
 1. Install Expo Command Line Interface
-```bash
+```
 npm install expo-cli --global
 ```
 
 2. Create new Expo project in projects directory
-```bash
+```
 expo init [project-name]
 ```
 
 3. Start expo by navigating to project folder & running
-```bash
+```
 npm start
 ```
-### Installation of Reacr Navigation library
+### Installation of dependencies and third-party library
 1. Navigate to project folder and run
-```bash
+```
 npm install react-navigation
 ```
 
 2. Install necessary dependencies
-```bash
+```
 npm install @react-navigation/native @react-navigation/stack
 expo install react-native-reanimated react-native-gesture-handler react-native-screens react-native-safe-area-context @react-native-community/masked-view
 ```
+
+3. Install Gifted Chat - A React Native library created specifically for developing chat apps
+```
+npm install react-native-gifted-chat
+```
+
+4. Install asyncStorage to save messages on the mobile device 
+```
+expo install @react-native-community/async-storage
+```
+
+5. Install netinfor to check if user is online or offline 
+```
+expo install @react-native-community/netinfo
+```
+
+5. Install necessary libraries to access requuired mobile hardware to share images and location 
+```
+expo install expo-image-picker
+expo install expo-location
+expo install react-native-maps
+```
+
+### Setting up and emulater and Simulator
+
+1. Download and install Android Studio to get Android Emulator 
+
+2. Download and install Xcode on your Mac to get IOS Simulator
+
+### Setting up Firestore Database
+
+1. Install firebase
+```
+npm install firebase@7.9.0
+```
+
+2. Generate your project app and its Firestore database in Cloud Firebase
+
+3. Register your app in Firestore for web and paste the firebaseConfig code in Chat.js
+
+4. Enable Anonympous sign-in method for project authentication in Cloud firebase 
+
 

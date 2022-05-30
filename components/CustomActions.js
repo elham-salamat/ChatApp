@@ -1,12 +1,12 @@
 import React, { Component } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import PropTypes from 'prop-types';
-import * as Permissions from 'expo-permissions';
 import * as ImagePicker from 'expo-image-picker';
 import * as Location from "expo-location";
 
 import "firebase/firestore";
 import firebase from "firebase";
+
 
 export default class CustomActions extends Component {
 
@@ -35,21 +35,22 @@ export default class CustomActions extends Component {
 
         return await snapshot.ref.getDownloadURL();
     }
-
-    //to select an existing picture
+    
+    // to select an existing picture
     pickImage = async () => {
-        const { status } = await Permissions.askAsync(Permissions.CAMERA_ROLL);
+        const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
 
         try {
             if (status === 'granted') {
                 let result = await ImagePicker.launchImageLibraryAsync({
-                    // mediaTypes: ImagePicker.MediaTypeOptions.Images,
-                    mediaTypes: 'Images',                  
+                    mediaTypes: ImagePicker.MediaTypeOptions.Images,
+                    // mediaTypes: 'Images',
+                                
                 })
                 .catch(error => 
                     console.log(error)
                 );
-
+                
                 if (!result.cancelled) {
                     const imageUrl = await this.imageUpload(result.uri);
                     this.props.onSend({ image: imageUrl });
@@ -62,7 +63,7 @@ export default class CustomActions extends Component {
 
     //to take a picture
     takePhoto = async () => {
-        const { status } = await Permissions.askAsync(Permissions.CAMERA, Permissions.CAMERA_ROLL);
+        const { status } = await ImagePicker.requestCameraPermissionsAsync();
 
         try {
             if (status === 'granted') {
@@ -77,6 +78,7 @@ export default class CustomActions extends Component {
                 if (!result.cancelled) {
                     const imageUrl = await this.imageUpload(result.uri);
                     this.props.onSend({ image: imageUrl });
+
                 }
             }
         } catch (error) {
@@ -87,7 +89,7 @@ export default class CustomActions extends Component {
     //to get user location
     getLocation = async () => {
         try {
-            const { status } = await Permissions.askAsync(Permissions.LOCATION);
+            const { status } = await  Location.requestForegroundPermissionsAsync();
             if (status === 'granted') {
                 let result = await Location.getCurrentPositionAsync(
                     {}
@@ -119,13 +121,10 @@ export default class CustomActions extends Component {
             async (buttonIndex) => {
                 switch (buttonIndex) {
                 case 0:
-                    // console.log('user wants to pick an image');
                     return this.pickImage();
                 case 1:
-                    // console.log('user wants to take a photo');
                     return this.takePhoto();;
                 case 2:
-                    // console.log('user wants to get their location');
                     return this.getLocation();
                 }
             },
